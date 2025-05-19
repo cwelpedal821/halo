@@ -55,6 +55,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const videoWrapper = document.querySelector('.video-wrapper');
             videoWrapper.innerHTML = '<div class="video-unavailable">Film niedostępny</div>';
         }
+
+        // Create and style the test text element
+        const testText = document.createElement('div');
+        testText.style.position = 'absolute';
+        testText.style.color = 'white';
+        testText.style.padding = '5px 10px';
+        testText.style.backgroundColor = 'rgba(220, 38, 38, 0.7)';
+        testText.style.borderRadius = '4px';
+        testText.style.fontSize = '14px';
+        testText.style.fontWeight = 'bold';
+        testText.style.zIndex = '1000';
+        testText.style.display = 'none';
+        testText.textContent = 'test';
+
+        // Add the test text to the video wrapper
+        const videoWrapper = document.querySelector('.video-wrapper');
+        videoWrapper.appendChild(testText);
+
+        // Function to show text in random position
+        function showRandomText() {
+            const maxX = videoWrapper.offsetWidth - testText.offsetWidth;
+            const maxY = videoWrapper.offsetHeight - testText.offsetHeight;
+            
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+            
+            testText.style.left = `${randomX}px`;
+            testText.style.top = `${randomY}px`;
+            testText.style.display = 'block';
+            
+            // Hide after 2 seconds
+            setTimeout(() => {
+                testText.style.display = 'none';
+            }, 2000);
+        }
+
+        // Show text every 10 seconds
+        setInterval(showRandomText, 10000);
     } else {
         // Redirect to home page if movie not found
         window.location.href = '/';
