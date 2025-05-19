@@ -69,14 +69,15 @@ document.addEventListener('DOMContentLoaded', () => {
         testText.style.display = 'none';
         testText.textContent = 'test';
 
-        // Add the test text to the video wrapper
-        const videoWrapper = document.querySelector('.video-wrapper');
-        videoWrapper.appendChild(testText);
+        // Add the test text to the video container
+        const videoContainer = document.querySelector('.plyr');
+        videoContainer.appendChild(testText);
 
         // Function to show text in random position
         function showRandomText() {
-            const maxX = videoWrapper.offsetWidth - testText.offsetWidth;
-            const maxY = videoWrapper.offsetHeight - testText.offsetHeight;
+            const container = document.fullscreenElement || videoContainer;
+            const maxX = container.offsetWidth - testText.offsetWidth;
+            const maxY = container.offsetHeight - testText.offsetHeight;
             
             const randomX = Math.floor(Math.random() * maxX);
             const randomY = Math.floor(Math.random() * maxY);
@@ -92,7 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Show text every 10 seconds
-        setInterval(showRandomText, 10000);
+        let textInterval = setInterval(showRandomText, 10000);
+
+        // Handle fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            // Clear existing interval and start a new one to ensure proper positioning
+            clearInterval(textInterval);
+            textInterval = setInterval(showRandomText, 10000);
+        });
+
+        // Clean up on page unload
+        window.addEventListener('unload', () => {
+            clearInterval(textInterval);
+        });
     } else {
         // Redirect to home page if movie not found
         window.location.href = '/';
