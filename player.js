@@ -23,6 +23,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Anti-screen capture protection
+    function addScreenCaptureProtection() {
+        const video = document.querySelector('video');
+        
+        // Prevent screen capture
+        video.style.webkitFilter = 'contrast(100%)';
+        
+        // Add dynamic video protection
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Create protective overlay
+        const overlay = document.createElement('div');
+        overlay.style.position = 'absolute';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.zIndex = '2';
+        video.parentElement.appendChild(overlay);
+
+        // Add dynamic noise pattern
+        function updateNoise() {
+            const timestamp = new Date().getTime();
+            overlay.style.background = `repeating-linear-gradient(
+                ${Math.sin(timestamp/1000) * 360}deg,
+                rgba(255,255,255,0.01) 0px,
+                rgba(255,255,255,0.02) 1px
+            )`;
+            requestAnimationFrame(updateNoise);
+        }
+        updateNoise();
+
+        // Detect screen capture attempts
+        document.addEventListener('keydown', (e) => {
+            // Detect common screen capture shortcuts
+            if (
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.key === 'PrintScreen') ||
+                (e.ctrlKey && e.key === 'P')
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent right-click
+        video.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        // Add invisible watermark
+        const watermark = document.createElement('div');
+        watermark.style.position = 'absolute';
+        watermark.style.top = '50%';
+        watermark.style.left = '50%';
+        watermark.style.transform = 'translate(-50%, -50%)';
+        watermark.style.color = 'rgba(255,255,255,0.01)';
+        watermark.style.fontSize = '50px';
+        watermark.style.pointerEvents = 'none';
+        watermark.style.userSelect = 'none';
+        watermark.style.zIndex = '1';
+        watermark.textContent = new Date().toISOString();
+        video.parentElement.appendChild(watermark);
+
+        // Update watermark periodically
+        setInterval(() => {
+            watermark.textContent = new Date().toISOString();
+        }, 1000);
+    }
+
     // Get movie ID from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
@@ -51,6 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 ]
             };
+            
+            // Add screen capture protection after source is set
+            player.on('ready', () => {
+                addScreenCaptureProtection();
+            });
         } else {
             const videoWrapper = document.querySelector('.video-wrapper');
             videoWrapper.innerHTML = '<div class="video-unavailable">Film niedostępny</div>';
